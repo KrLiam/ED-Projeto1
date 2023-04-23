@@ -47,16 +47,36 @@ struct Cenario {
        roboX(roboX),
        roboY(roboY),
        matriz(matriz) {}
+    
+    bool get(int i, int j) {
+        return matriz[i*largura + j];
+    }
 };
 
 
 bool* parse_matriz(std::string& value) {
     StringReader r(value);
 
-    return new bool[10];
+    std::string trimmed = "";
+
+    while (char ch = r.peek()) {
+        if (!std::isspace(ch)) {
+            trimmed += ch;
+        }
+        ++r;
+    };
+
+    int length = trimmed.length();
+    bool* matriz = new bool[length];
+
+    for (int i = 0; i < length; i++) {
+        matriz[i] = trimmed[i] - 48;
+    }
+
+    return matriz;
 }
 
-ArrayList<Cenario>* parse(std::string& entrada) {
+ArrayList<Cenario>& parse(std::string& entrada) {
     StringReader r(entrada);
 
     auto cenarios = new ArrayList<Cenario>(200);
@@ -112,13 +132,37 @@ ArrayList<Cenario>* parse(std::string& entrada) {
         throw parse_error("Unclosed tag.");
     }
 
-    return cenarios;
+    return *cenarios;
 }
 
 int main() {
     std::string entrada = read_file();
 
-    ArrayList<Cenario>* cenarios = parse(entrada);
+    ArrayList<Cenario>* cenarios;
+
+    try {
+        cenarios = &parse(entrada);
+    }
+    catch (...) {
+        std::cout << "erro" << std::endl;
+        return 0;
+    }
+
+    auto& cenariosr = *cenarios;
+
+    for (int i = 0; i < cenariosr.size(); i++) {
+        auto cenario = cenariosr[i];
+        std::cout << cenario.nome << std::endl;
+        std::cout << cenario.roboX << ", " << cenario.roboY << std::endl;
+        std::cout << cenario.largura << ", " << cenario.altura << std::endl;
+
+        for (int i = 0; i < cenario.altura; i++) {
+            for (int j = 0; j < cenario.largura; j++) {
+                std::cout << cenario.get(i, j);
+            }
+            std::cout << std::endl;
+        }
+    }
 
     return 0;
 }

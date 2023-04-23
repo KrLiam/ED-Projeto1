@@ -3,8 +3,6 @@
 #include <cstring>
 #include <iostream>
 #include <exception>
-#include <memory>
-#include <map>
 
 #include "array_stack.h"
 
@@ -87,6 +85,11 @@ public:
         expect('>');
 
         return {key, is_closing};
+    }
+
+    StringReader& operator++() {
+        ++i;
+        return *this;
     }
 
 //     void parse() {
