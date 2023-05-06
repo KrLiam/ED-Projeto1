@@ -91,6 +91,7 @@ bool* parse_matriz(std::string& value) {
     bool* matriz = new bool[length];
 
     for (int i = 0; i < length; i++) {
+        // conversão do código ascii para valor 0-1.
         matriz[i] = trimmed[i] - 48;
     }
 
@@ -99,8 +100,8 @@ bool* parse_matriz(std::string& value) {
 
 void parse(const std::string& entrada, ArrayList<Cenario>& result) {
     StringReader r(entrada);
-    Cenario cenario;
     ArrayStack<std::string> stack(100);
+    Cenario cenario;
 
     while (r.peek()) {
         std::string contents = r.read_until('<');
@@ -152,38 +153,56 @@ void parse(const std::string& entrada, ArrayList<Cenario>& result) {
 }
 
 
+// função helper para testar se um elemento T está
+// presente na lista.
+template <typename T>
+bool contains(ArrayList<T>* lista, T& elemento) {
+    return lista->find(elemento) != lista->size();
+}
+
 int calculate(Cenario& c) {
-    auto remaining = std::make_unique<ArrayList<Position>>(c.largura * c.altura);
+    auto remaining = new ArrayList<Position>(c.largura * c.altura);
     int count = 0;
 
+    // adicionar posiçao inicial do robo se é uma posição com 1
     if (c.get(c.roboX, c.roboY)) {
         remaining->push_back(Position(c.roboX, c.roboY));
     }
 
+    // enquanto há posições para limpar
     while (!remaining->empty()) {
+        // pega a próxima posição
         Position p = remaining->pop_front();
-        c.clear(p);
-        count++;
+        // se a posição precisa ser limpa
+        if (c.get(p)) {
+            // limpa região e acrescenta contagem
+            c.clear(p);
+            count++;
+        }
 
+        // para cada posição adjacente
         Position p1(p.i - 1, p.j);
         Position p2(p.i + 1, p.j);
         Position p3(p.i, p.j - 1);
         Position p4(p.i, p.j + 1);
 
-        if (c.get(p1) && remaining->find(p1) == remaining->size()) {
+        // adiciona posição se precisar ser limpa
+        // e ainda não foi adicionada a lista de posições
+        if (c.get(p1) && !contains(remaining, p1)) {
             remaining->push_back(p1);
         }
-        if (c.get(p2) && remaining->find(p2) == remaining->size()) {
+        if (c.get(p2) && !contains(remaining, p2)) {
             remaining->push_back(p2);
         }
-        if (c.get(p3) && remaining->find(p3) == remaining->size()) {
+        if (c.get(p3) && !contains(remaining, p3)) {
             remaining->push_back(p3);
         }
-        if (c.get(p4) && remaining->find(p4) == remaining->size()) {
+        if (c.get(p4) && !contains(remaining, p4)) {
             remaining->push_back(p4);
         }
     }
 
+    delete remaining;
     return count;
 }
 
