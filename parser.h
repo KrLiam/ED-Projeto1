@@ -21,7 +21,7 @@ class parse_error : std::exception {
 
 class StringReader {
 public:
-    StringReader(std::string& string) : str(string) {}
+    StringReader(const std::string& string) : str(string) {}
 
     char peek() {
         return str[i];
@@ -122,6 +122,6 @@ public:
 
 private:
     // structures::ArrayStack<std::shared_ptr<XmlElement>> stack;
-    std::string& str;
+    const std::string& str;
     int i = 0;
 };

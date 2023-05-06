@@ -97,12 +97,9 @@ bool* parse_matriz(std::string& value) {
     return matriz;
 }
 
-ArrayList<Cenario>& parse(std::string& entrada) {
+void parse(const std::string& entrada, ArrayList<Cenario>& result) {
     StringReader r(entrada);
-
-    auto cenarios = new ArrayList<Cenario>(200);
     Cenario cenario;
-
     ArrayStack<std::string> stack(100);
 
     while (r.peek()) {
@@ -126,7 +123,7 @@ ArrayList<Cenario>& parse(std::string& entrada) {
             }
 
             if (tag.key == "cenario") {
-                cenarios->push_back(cenario);
+                result.push_back(cenario);
             }
             else if (tag.key == "nome") {
                 cenario.nome = contents;
@@ -152,8 +149,6 @@ ArrayList<Cenario>& parse(std::string& entrada) {
     if (stack.size()) {
         throw parse_error("Unclosed tag.");
     }
-
-    return *cenarios;
 }
 
 
@@ -199,38 +194,19 @@ int main() {
     char xmlfilename[100];
     std::cin >> xmlfilename;  // entrada
     std::string entrada = read_file(xmlfilename);
-    // std::string entrada = read_file("cenarios/cenarios6.xml");
 
-    ArrayList<Cenario>* cenarios;
+    ArrayList<Cenario>* cenarios = new ArrayList<Cenario>(200);
 
     try {
-        cenarios = &parse(entrada);
+        parse(entrada, *cenarios);
     }
     catch (...) {
         std::cout << "erro" << std::endl;
         return 0;
     }
 
-    auto& cenariosr = *cenarios;
-
-    for (int i = 0; i < cenariosr.size(); i++) {
-        auto cenario = cenariosr[i];
-        // std::cout << "nome " << cenario.nome << std::endl;
-        // std::cout << "nome " << cenario.nome << std::endl;
-        // std::cout << "robo " << cenario.roboX << ", " << cenario.roboY << std::endl;
-        // std::cout << "tamanho " << cenario.largura << ", " << cenario.altura << std::endl;
-
-        // for (int i = 0; i < cenario.altura; i++) {
-        //     for (int j = 0; j < cenario.largura; j++) {
-        //         if (i == cenario.roboX && j == cenario.roboY) {
-        //             std::cout << "X";
-        //         } else {
-        //             std::cout << cenario.get(i, j);
-        //         }
-        //     }
-        //     std::cout << std::endl;
-        // }
-
+    for (int i = 0; i < cenarios->size(); i++) {
+        Cenario& cenario = cenarios->at(i);
         int count = calculate(cenario);
         std::cout << cenario.nome << " " << count << std::endl;
     }
