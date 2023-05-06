@@ -92,36 +92,7 @@ public:
         return *this;
     }
 
-//     void parse() {
-//         auto root = std::make_shared<XmlElement>("#root");
-//         stack.push(root);
-// 
-//         while (peek()) {
-//             auto parent = stack.top();
-// 
-//             std::string text = read_until('<');
-//             parent->text.append(text);
-// 
-//             Tag tag = parse_tag();
-// 
-//             if (tag.is_closing) {
-//                 if (parent->key != tag.key) {
-//                     throw parse_error(std::string("Unclosed tag '") + parent->key + "'.");
-//                 }
-//                 stack.pop();
-//                 continue;
-//             }
-// 
-//             auto child = std::make_shared<XmlElement>(tag.key);
-//             parent->add_child(child);
-//             stack.push(child);
-//         }
-//         stack.clear();
-//         return root;
-//     }
-
 private:
-    // structures::ArrayStack<std::shared_ptr<XmlElement>> stack;
     const std::string& str;
     int i = 0;
 };

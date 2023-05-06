@@ -152,7 +152,6 @@ void parse(const std::string& entrada, ArrayList<Cenario>& result) {
 }
 
 
-
 int calculate(Cenario& c) {
     auto remaining = std::make_unique<ArrayList<Position>>(c.largura * c.altura);
     int count = 0;
@@ -165,8 +164,6 @@ int calculate(Cenario& c) {
         Position p = remaining->pop_front();
         c.clear(p);
         count++;
-
-        // std::cout << p.i << " " << p.j << std::endl;
 
         Position p1(p.i - 1, p.j);
         Position p2(p.i + 1, p.j);
