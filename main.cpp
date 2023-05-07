@@ -2,12 +2,89 @@
 #include <string>
 #include <iostream>
 #include <memory>
+#include <cctype>
+#include <cstring>
+#include <exception>
 
 #include "array_list.h"
 #include "array_stack.h"
-#include "parser.h"
 
 using namespace structures;
+
+
+class parse_error : std::exception {
+    std::string message;
+
+ public:
+    parse_error() : message("") {}
+    parse_error(std::string msg) : message(msg) {}
+
+    virtual const char* what() const throw() {
+        return message.c_str();
+    }
+};
+
+class StringReader {
+public:
+    StringReader(const std::string& string) : str(string) {}
+
+    char peek() {
+        return str[i];
+    }
+
+    char read_char(char ch = 0) {
+        char p = peek();
+        
+        if (!ch || ch == p) {
+            i++;
+            return p;
+        }
+        return 0;
+    }
+
+    std::string read_word() {
+        int start = i;
+        char ch = peek();
+
+        while(ch && !isspace(ch) && ch != '<' && ch != '>') {
+            i++;
+            ch = peek();
+        }
+        return str.substr(start, i - start);
+    }
+
+    std::string read_until(char ch) {
+        int start = i;
+        while(peek() && peek() != ch) {
+            i++;
+        }
+        return str.substr(start, i - start);
+    }
+
+    void consume_space() {
+        while (peek() && isspace(peek())) {
+            i++;
+        }
+    }
+
+    char expect(char ch) {
+        char result = read_char(ch);
+        if (!result) {
+            throw parse_error(std::string("Expected character '") + ch + "'. Got '" + peek() + "'.");
+        }
+        return result;
+    }
+
+    StringReader& operator++() {
+        ++i;
+        return *this;
+    }
+
+private:
+    const std::string& str;
+    int i = 0;
+};
+
 
 std::string read_file(char* xmlfilename) {    
     std::ifstream t(xmlfilename);
@@ -75,6 +152,26 @@ struct Cenario {
 };
 
 
+struct Tag {
+    std::string key = "";
+    bool is_closing = false;
+
+    Tag(std::string key, bool is_closing) : key(key), is_closing(is_closing) {}
+};
+
+Tag parse_tag(StringReader& r) {
+    r.expect('<');
+    bool is_closing = r.read_char('/');
+    r.consume_space();
+
+    std::string key = r.read_word();
+
+    r.consume_space();
+    r.expect('>');
+
+    return Tag(key, is_closing);
+}
+
 bool* parse_matriz(std::string& value) {
     StringReader r(value);
 
@@ -107,7 +204,7 @@ void parse(const std::string& entrada, ArrayList<Cenario>& result) {
         std::string contents = r.read_until('<');
 
         if (!r.peek()) break;
-        StringReader::Tag tag = r.parse_tag();
+        Tag tag = parse_tag(r);
         
         if (!tag.is_closing) {
             // opening
